@@ -1,0 +1,26 @@
+name: Build & Release
+on: [push, release]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build Linux
+      run: |
+        sudo apt update
+        sudo apt install -y cmake libcurl4-openssl-dev libev-dev libmbedtls-dev git
+        git clone https://github.com/sagernet/wisp.git && cd wisp && mkdir build && cd build && cmake .. && make install
+        cmake . && make
+    - uses: actions/upload-artifact@v3
+      with: {name: proxy-linux, path: proxy}
+    
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+    - uses: actions/download-artifact@v3
+    - uses: softprops/action-gh-release@v1
+      with:
+        files: proxy-linux/proxy
