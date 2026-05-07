@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.16)
+project(curl-wg-proxy)
+
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(LIBEV REQUIRED libev)
+pkg_check_modules(LIBCURL REQUIRED libcurl)
+pkg_check_modules(MBEDTLS REQUIRED mbedtls)
+
+add_executable(proxy src/main.c src/proxy.c)
+target_link_libraries(proxy ${LIBCURL_LIBRARIES} ${LIBEV_LIBRARIES} wisp mbedtls)
+target_include_directories(proxy PRIVATE ${LIBCURL_INCLUDE_DIRS} ${LIBEV_INCLUDE_DIRS})
+target_compile_options(proxy PRIVATE ${LIBCURL_CFLAGS_OTHER} ${LIBEV_CFLAGS_OTHER})
