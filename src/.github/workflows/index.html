@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 curl-wg-proxy - Live Demo & Deploy</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .hero { text-align: center; color: white; margin-bottom: 3rem; }
+        .hero h1 { font-size: 3rem; margin-bottom: 1rem; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem; }
+        .card { background: rgba(255,255,255,0.95); border-radius: 20px; padding: 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+        .btn { display: inline-block; background: #ff6b6b; color: white; padding: 1rem 2rem; border-radius: 50px; text-decoration: none; font-weight: bold; transition: all 0.3s; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(255,107,107,0.3); }
+        .demo { background: #f8f9fa; border: 2px dashed #dee2e6; padding: 1.5rem; border-radius: 10px; }
+        .terminal { background: #1e1e1e; color: #00ff00; padding: 1rem; border-radius: 8px; font-family: monospace; margin: 1rem 0; }
+        pre { background: #f4f4f4; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+        .stats { display: flex; gap: 2rem; justify-content: center; margin: 2rem 0; }
+        .stat { text-align: center; }
+        .stat-number { font-size: 2.5rem; font-weight: bold; color: #ff6b6b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>🚀 curl-wg-proxy</h1>
+            <p>HTTP Proxy + WireGuard Tunnel • One-Click Deploy</p>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-number" id="stars">0</div>
+                    <div>Stars</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number" id="forks">0</div>
+                    <div>Forks</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <h2>⚡ Live Demo</h2>
+                <div class="demo">
+                    <input type="text" id="targetUrl" placeholder="https://ifconfig.me" style="width:100%;padding:0.5rem;">
+                    <br><button class="btn" onclick="testProxy()">Test Proxy → <span id="result"></span></button>
+                </div>
+                <div id="output" class="terminal" style="min-height:100px;"></div>
+            </div>
+
+            <div class="card">
+                <h2>🐳 Docker Deploy</h2>
+                <div class="terminal">
+$ docker build -t proxy .
+$ docker run -p 8080:8080 proxy
+                </div>
+                <a href="https://hub.docker.com/r/YOURUSERNAME/curl-wg-proxy" class="btn" target="_blank">Docker Hub</a>
+                <a href="#build" class="btn" onclick="copyDeploy()">Copy Deploy</a>
+            </div>
+
+            <div class="card">
+                <h2>📦 GitHub Actions</h2>
+                <p>Auto-builds binaries on every push!</p>
+                <div class="terminal">
+proxy-linux-amd64 (Ready to download ↓)
+                </div>
+                <a href="https://github.com/YOURUSERNAME/curl-wg-proxy/actions" class="btn" target="_blank">View Builds</a>
+            </div>
+        </div>
+
+        <div class="cards" style="margin-top:2rem;">
+            <div class="card">
+                <h2>🚀 Quick Start</h2>
+                <pre><code>git clone https://github.com/YOURUSERNAME/curl-wg-proxy
+cd curl-wg-proxy
+docker build -t proxy .
+docker run -p 8080:8080 proxy
+
+# Test
+curl -x http://localhost:8080 https://ifconfig.me</code></pre>
+            </div>
+
+            <div class="card">
+                <h2>📊 Features</h2>
+                <ul style="list-style:none;">
+                    <li>✅ HTTP/HTTPS Proxy</li>
+                    <li>✅ WireGuard Tunnel</li>
+                    <li>✅ libcurl + WISP</li>
+                    <li>✅ Auto-build CI/CD</li>
+                    <li>✅ Docker Ready</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Live GitHub stats
+        fetch('https://api.github.com/repos/YOURUSERNAME/curl-wg-proxy')
+            .then(r=>r.json())
+            .then(data => {
+                document.getElementById('stars').textContent = data.stargazers_count;
+                document.getElementById('forks').textContent = data.forks_count;
+            });
+
+        // Proxy tester (uses CORS proxy for demo)
+        async function testProxy() {
+            const url = document.getElementById('targetUrl').value || 'https://ifconfig.me';
+            const output = document.getElementById('output');
+            const result = document.getElementById('result');
+            
+            output.textContent = `Testing ${url}...\n`;
+            result.textContent = '⏳';
+            
+            try {
+                // Demo via public proxy service (replace with your deployed proxy)
+                const res = await fetch(`https://corsproxy.io/?${encodeURIComponent(url)}`);
+                const text = await res.text();
+                output.textContent += `✅ Success!\n${text.slice(0,500)}...`;
+                result.textContent = '✅';
+            } catch(e) {
+                output.textContent += `❌ Error: ${e.message}`;
+                result.textContent = '❌';
+            }
+        }
+
+        function copyDeploy() {
+            navigator.clipboard.writeText(`docker build -t proxy .
+docker run -p 8080:8080 proxy`);
+            alert('Deploy commands copied! 🚀');
+        }
+
+        // Auto-test on load
+        window.onload = () => testProxy();
+    </script>
+</body>
+</html>
